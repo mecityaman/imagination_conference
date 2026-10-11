@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Fırın Pizza Menüsü</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
@@ -17,6 +18,7 @@
   --accent:#f08a3c; --accent-ink:#1b1a19; --plate:#3a2e24; --shade:rgba(0,0,0,.35); color-scheme:dark}
 
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
 .wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:0 120px}
 
@@ -38,12 +40,18 @@ section{margin-top:28px;scroll-margin-top:170px}
 .sec-h h2{font-family:var(--f-display);font-weight:800;font-size:22px;letter-spacing:.02em;text-transform:uppercase;color:var(--accent);margin:0;white-space:nowrap}
 .hatch{flex:1;height:12px;background:repeating-linear-gradient(-55deg,var(--accent) 0 3px,transparent 3px 7px);opacity:.75}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
-.item{background:var(--card);border-radius:14px;padding:12px;display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:start;box-shadow:0 1px 0 var(--shade)}
-.pic{width:72px;height:72px;border-radius:50%;background:var(--plate);display:grid;place-items:center;font-size:38px;line-height:1;position:relative;cursor:pointer;border:0;padding:0;transition:transform .2s}
-.pic:hover{transform:rotate(-12deg) scale(1.05)}
-.info{min-width:0;display:flex;flex-direction:column;gap:6px}
-.name{font-weight:700;font-size:15px;line-height:1.2}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.item{background:var(--card);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 0 var(--shade),0 6px 18px var(--shade)}
+.pic{display:block;width:100%;aspect-ratio:4/3;max-width:100%;border:0;padding:0;background:var(--plate);cursor:zoom-in;position:relative;overflow:hidden;font-size:84px;line-height:1}
+.pic img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
+.pic:hover img{transform:scale(1.05)}
+.pic .ph{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 55%,var(--card) 0 34%,var(--plate) 35%)}
+.pic .tag{position:absolute;left:8px;bottom:8px;font:600 10px var(--f-body);letter-spacing:.06em;text-transform:uppercase;background:rgba(0,0,0,.5);color:#fff;padding:3px 7px;border-radius:999px}
+.info{min-width:0;display:flex;flex-direction:column;gap:8px;padding:12px 14px 14px;flex:1}
+.name{font-family:var(--f-display);font-weight:800;font-size:18px;line-height:1.15}
+.lb{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;cursor:zoom-out}
+.lb img{max-width:100%;max-height:78%;border-radius:12px;object-fit:contain}
+.lb p{color:#fff;font-family:var(--f-display);font-size:22px;margin:0;text-align:center}
 .desc{font-size:12px;color:var(--muted)}
 .row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
 .price{font-family:var(--f-display);font-weight:800;font-size:18px;font-variant-numeric:tabular-nums}
@@ -93,9 +101,10 @@ section{margin-top:28px;scroll-margin-top:170px}
     <nav class="chips" id="chips" aria-label="Kategoriler"></nav>
   </header>
   <main id="menu"></main>
-  <p class="note">Masadaki basılı menünün fotoğrafından aktarılmıştır, resmi değildir. Fotoğrafta kenarı kesik birkaç isim tahmin edildi (ör. Füme Dil Pizza); Kavurmalı Calzone fiyatı okunamadı. Görseller temsilidir. Sipariş listesi yalnızca hesap için, restorana gönderilmez.</p>
+  <p class="note">Masadaki basılı menünün fotoğrafından aktarılmıştır, resmi değildir. Fotoğrafta kenarı kesik birkaç isim tahmin edildi (ör. Füme Dil Pizza); Kavurmalı Calzone fiyatı okunamadı. Fotoğraflar temsilidir, restoranın kendi ürünleri değildir (kaynak: açık kaynak Foodish görsel seti); fotoğrafı olmayan ürünlerde simge var. Sipariş listesi yalnızca hesap için, restorana gönderilmez.</p>
 </div>
 
+<div class="lb" id="lb" hidden><img id="lbImg" alt=""><p id="lbCap"></p></div>
 <div class="bar off" id="bar" role="button" tabindex="0" aria-label="Siparişi aç">
   <div><span class="cnt" id="cnt">0</span>Siparişim</div>
   <b id="barTotal">₺0</b>
@@ -146,6 +155,16 @@ const M=[
   ["Lipton Ice Tea","🧃",115,"Limon, şeftali, karpuz, mango"],["Tropicana Meyve Suyu","🧃",115],
   ["Özerhisar Ayran","🥛",90],["Sütaş Ayran (Kutu)","🥛",75]]}
 ];
+const IMG={"Çıtır Tavuk ve Patates":"citir-tavuk","Patates Kızartması":"patates","Trüf Mayonez Soslu Patates":"truf-patates","Cheddar Soslu Patates":"cheddar-patates",
+"Classic Burger":"classic-burger","Cheeseburger":"cheeseburger","Chicken Burger":"chicken-burger","Tiftik Burger":"tiftik-burger",
+"BBQ Tavuk Pizza":"bbq-tavuk","Ricotta Pizza":"ricotta","4 Formaggi Pizza":"4-formaggi","Tavuk Sezar Pizza":"tavuk-sezar","Inferno Pizza":"inferno",
+"Füme Kaburga Pizza":"fume-kaburga","Ricotta & Füme Kaburga Pizza":"ricotta-kaburga","Tiftik Pizza":"tiftik","Mantarlı Pizza":"mantarli",
+"Teriyaki Tavuklu Pizza":"teriyaki","Kokoreç Pizza":"kokorec-pizza","Kasap Sucuk Pizza":"kasap-sucuk","Ton Balıklı Pizza":"ton-balikli",
+"Frankfurter Sosis Pizza":"frankfurter","Cheddar Salam Pizza":"cheddar-salam","Kavurmalı Calzone":"calzone","Füme Dil Pizza":"fume-dil",
+"Margherita Pizza":"margherita","Karışık Pizza":"karisik","Pepperoni Pizza":"pepperoni","Sucuklu Pizza":"sucuklu","Şarküteri Pizza":"sarkuteri",
+"Kavurmalı Pizza":"kavurmali","Pastırmalı Pizza":"pastirmali","Vejetaryen Pizza":"vejetaryen","Kabaklı Tulum Peynirli Pizza":"kabakli",
+"Marlenka":"marlenka","Tiramisu":"tiramisu"};
+const src=n=>IMG[n]?"img/"+IMG[n]+".webp":null;
 const tl=n=>"₺"+n.toLocaleString("tr-TR");
 const $=s=>document.querySelector(s);
 const sizeSel={}; // item key -> size index
@@ -169,7 +188,7 @@ function render(){
       const multi=Array.isArray(it[2]),na=it[2]==null;
       const p=na?'<span class="price na">Fiyat sorun</span>':`<span class="price">${tl(priceOf(k,sizeSel[k]))}</span>`;
       const sizes=multi?`<div class="sizes" role="group" aria-label="Boy">${S.map((s,j)=>`<button data-k="${k}" data-s="${j}" aria-pressed="${sizeSel[k]===j}">${s}</button>`).join("")}</div>`:"";
-      html+=`<article class="item"><button class="pic" data-add="${k}" aria-label="${it[0]} ekle">${it[1]}</button><div class="info"><div class="name">${it[0]}</div>${it[3]?`<div class="desc">${it[3]}</div>`:""}${sizes}<div class="row">${p}<button class="add" data-add="${k}" ${na?"disabled":""} aria-label="${it[0]} ekle">+</button></div></div></article>`;
+      html+=`<article class="item"><button class="pic" data-zoom="${k}" aria-label="${it[0]} fotoğrafını büyüt">${src(it[0])?`<img src="${src(it[0])}" alt="${it[0]}" loading="lazy"><span class="tag">Temsili</span>`:`<span class="ph">${it[1]}</span>`}</button><div class="info"><div class="name">${it[0]}</div>${it[3]?`<div class="desc">${it[3]}</div>`:""}${sizes}<div class="row">${p}<button class="add" data-add="${k}" ${na?"disabled":""} aria-label="${it[0]} ekle">+</button></div></div></article>`;
     });
     html+="</div></section>";
   });
@@ -193,6 +212,7 @@ function toast(msg){let el=$(".toast");if(!el){el=document.createElement("div");
 
 document.addEventListener("click",e=>{
   const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.zoom){const it=lookup[b.dataset.zoom].it;const u=src(it[0]);if(!u){const ck=cartKey(b.dataset.zoom);if(it[2]==null)return;cart[ck]=(cart[ck]||0)+1;drawCart();toast(it[0]+" eklendi");return}$("#lbImg").src=u;$("#lbImg").alt=it[0];$("#lbCap").textContent=it[0];$("#lb").hidden=false;return}
   if(b.dataset.s!==undefined){sizeSel[b.dataset.k]=+b.dataset.s;render();return}
   if(b.dataset.add){const k=b.dataset.add;if(lookup[k].it[2]==null)return;const ck=cartKey(k);cart[ck]=(cart[ck]||0)+1;drawCart();toast(lookup[k].it[0]+" eklendi");return}
   if(b.dataset.inc){cart[b.dataset.inc]++;drawCart();return}
@@ -200,6 +220,8 @@ document.addEventListener("click",e=>{
   if(b.dataset.go){const s=document.getElementById(b.dataset.go);if(s)s.scrollIntoView({behavior:"smooth"});return}
 });
 $("#q").addEventListener("input",render);
+$("#lb").addEventListener("click",()=>$("#lb").hidden=true);
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){$("#lb").hidden=true;$("#sheet").hidden=true}});
 const openSheet=()=>{$("#sheet").hidden=false};
 $("#bar").addEventListener("click",openSheet);
 $("#bar").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openSheet()}});
