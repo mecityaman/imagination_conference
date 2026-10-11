@@ -101,7 +101,7 @@ section{margin-top:28px;scroll-margin-top:170px}
     <nav class="chips" id="chips" aria-label="Kategoriler"></nav>
   </header>
   <main id="menu"></main>
-  <p class="note">Masadaki basılı menünün fotoğrafından aktarılmıştır, resmi değildir. Fotoğrafta kenarı kesik birkaç isim tahmin edildi (ör. Füme Dil Pizza); Kavurmalı Calzone fiyatı okunamadı. Fotoğraflar temsilidir, restoranın kendi ürünleri değildir (kaynak: açık kaynak Foodish görsel seti); fotoğrafı olmayan ürünlerde simge var. Sipariş listesi yalnızca hesap için, restorana gönderilmez.</p>
+  <p class="note">Masadaki basılı menünün fotoğrafından aktarılmıştır, resmi değildir. Fotoğrafta kenarı kesik birkaç isim tahmin edildi (ör. Füme Dil Pizza); Kavurmalı Calzone fiyatı okunamadı. Fotoğraflar temsilidir, restoranın kendi ürünleri değildir (kaynak: açık kaynak Foodish görsel seti); fotoğrafı bulunamayan ürünler elle çizilmiş vektör illüstrasyondur. Sipariş listesi yalnızca hesap için, restorana gönderilmez.</p>
 </div>
 
 <div class="lb" id="lb" hidden><img id="lbImg" alt=""><p id="lbCap"></p></div>
@@ -164,7 +164,15 @@ const IMG={"Çıtır Tavuk ve Patates":"citir-tavuk","Patates Kızartması":"pat
 "Margherita Pizza":"margherita","Karışık Pizza":"karisik","Pepperoni Pizza":"pepperoni","Sucuklu Pizza":"sucuklu","Şarküteri Pizza":"sarkuteri",
 "Kavurmalı Pizza":"kavurmali","Pastırmalı Pizza":"pastirmali","Vejetaryen Pizza":"vejetaryen","Kabaklı Tulum Peynirli Pizza":"kabakli",
 "Marlenka":"marlenka","Tiramisu":"tiramisu"};
-const src=n=>IMG[n]?"img/"+IMG[n]+".webp":null;
+const DRAW={"Kabak & Jalapeno Cipsi":"kabak-cips","Peynir Füme Et Tabağı":"peynir-tabagi","Karman Çorman Sepeti":"karman-corman",
+"Tulum Peynirli Cevizli Salata":"tulum-salata","Tavuklu Sezar Salata":"sezar-salata","Roka Salata":"roka-salata",
+"Ekmek Arası Tavuk":"ea-tavuk","Ekmek Arası Köfte":"ea-kofte","Ekmek Arası Kokoreç":"ea-kokorec","Tavuk Dürüm":"tavuk-durum",
+"Tablacı Köfte Dürüm":"kofte-durum","Çıtır Tavuk French Taco":"french-taco","Americano":"americano","Espresso":"espresso",
+"Türk Kahvesi":"turk-kahvesi","Çay":"cay","Şişe Su":"su","Soda":"soda","Soda Limon":"soda-limon","Limonata":"limonata",
+"7Up Kutu":"7up","Niğde Gazozu":"gazoz","Pepsi Kutu":"kola","Yedigün Kutu":"yedigun","Lipton Ice Tea":"ice-tea",
+"Tropicana Meyve Suyu":"meyve-suyu","Özerhisar Ayran":"ayran","Sütaş Ayran (Kutu)":"ayran-kutu"};
+const src=n=>IMG[n]?"img/"+IMG[n]+".webp":DRAW[n]?"img/"+DRAW[n]+".svg":null;
+const tagOf=n=>IMG[n]?"Temsili foto":"Çizim";
 const tl=n=>"₺"+n.toLocaleString("tr-TR");
 const $=s=>document.querySelector(s);
 const sizeSel={}; // item key -> size index
@@ -188,7 +196,7 @@ function render(){
       const multi=Array.isArray(it[2]),na=it[2]==null;
       const p=na?'<span class="price na">Fiyat sorun</span>':`<span class="price">${tl(priceOf(k,sizeSel[k]))}</span>`;
       const sizes=multi?`<div class="sizes" role="group" aria-label="Boy">${S.map((s,j)=>`<button data-k="${k}" data-s="${j}" aria-pressed="${sizeSel[k]===j}">${s}</button>`).join("")}</div>`:"";
-      html+=`<article class="item"><button class="pic" data-zoom="${k}" aria-label="${it[0]} fotoğrafını büyüt">${src(it[0])?`<img src="${src(it[0])}" alt="${it[0]}" loading="lazy"><span class="tag">Temsili</span>`:`<span class="ph">${it[1]}</span>`}</button><div class="info"><div class="name">${it[0]}</div>${it[3]?`<div class="desc">${it[3]}</div>`:""}${sizes}<div class="row">${p}<button class="add" data-add="${k}" ${na?"disabled":""} aria-label="${it[0]} ekle">+</button></div></div></article>`;
+      html+=`<article class="item"><button class="pic" data-zoom="${k}" aria-label="${it[0]} fotoğrafını büyüt">${src(it[0])?`<img src="${src(it[0])}" alt="${it[0]}" loading="lazy"><span class="tag">${tagOf(it[0])}</span>`:`<span class="ph">${it[1]}</span>`}</button><div class="info"><div class="name">${it[0]}</div>${it[3]?`<div class="desc">${it[3]}</div>`:""}${sizes}<div class="row">${p}<button class="add" data-add="${k}" ${na?"disabled":""} aria-label="${it[0]} ekle">+</button></div></div></article>`;
     });
     html+="</div></section>";
   });
