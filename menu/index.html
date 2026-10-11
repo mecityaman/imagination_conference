@@ -1,0 +1,218 @@
+<title>Fırın Pizza Menüsü</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: sticky header + category chips, a picture-card grid per section, a bottom order bar that opens a sheet. */
+:root{
+  --paper:#eeece8; --card:#fbfaf8; --ink:#2b2a28; --muted:#6f6b66; --line:#d9d5cf;
+  --accent:#e8792b; --accent-ink:#ffffff; --plate:#f3e6d9; --shade:rgba(43,42,40,.08);
+  --f-display:"Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
+  --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#1b1a19; --card:#252321; --ink:#efebe6; --muted:#a39d96; --line:#3a3734;
+  --accent:#f08a3c; --accent-ink:#1b1a19; --plate:#3a2e24; --shade:rgba(0,0,0,.35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#1b1a19; --card:#252321; --ink:#efebe6; --muted:#a39d96; --line:#3a3734;
+  --accent:#f08a3c; --accent-ink:#1b1a19; --plate:#3a2e24; --shade:rgba(0,0,0,.35); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:0 120px}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);padding-block:14px 10px;border-bottom:1px solid var(--line)}
+.brandrow{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(26px,5vw,38px);letter-spacing:-.02em;margin:0;line-height:1}
+h1 span{color:var(--accent)}
+.meta{font-size:12px;color:var(--muted);text-align:right}
+.tools{display:flex;gap:10px;margin-top:12px;align-items:center}
+#q{flex:1;min-width:0;font:inherit;padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+#q:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;gap:6px;overflow-x:auto;margin-top:10px;padding-bottom:4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;font:600 13px var(--f-body);padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+section{margin-top:28px;scroll-margin-top:170px}
+.sec-h{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.sec-h h2{font-family:var(--f-display);font-weight:800;font-size:22px;letter-spacing:.02em;text-transform:uppercase;color:var(--accent);margin:0;white-space:nowrap}
+.hatch{flex:1;height:12px;background:repeating-linear-gradient(-55deg,var(--accent) 0 3px,transparent 3px 7px);opacity:.75}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.item{background:var(--card);border-radius:14px;padding:12px;display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:start;box-shadow:0 1px 0 var(--shade)}
+.pic{width:72px;height:72px;border-radius:50%;background:var(--plate);display:grid;place-items:center;font-size:38px;line-height:1;position:relative;cursor:pointer;border:0;padding:0;transition:transform .2s}
+.pic:hover{transform:rotate(-12deg) scale(1.05)}
+.info{min-width:0;display:flex;flex-direction:column;gap:6px}
+.name{font-weight:700;font-size:15px;line-height:1.2}
+.desc{font-size:12px;color:var(--muted)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
+.price{font-family:var(--f-display);font-weight:800;font-size:18px;font-variant-numeric:tabular-nums}
+.price.na{font-size:13px;font-family:var(--f-body);font-weight:600;color:var(--muted)}
+.sizes{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;width:max-content}
+.sizes button{font:600 12px var(--f-body);border:0;background:transparent;color:var(--muted);padding:4px 9px;cursor:pointer}
+.sizes button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.add{width:34px;height:34px;flex:none;border-radius:50%;border:0;background:var(--ink);color:var(--paper);font-size:20px;line-height:1;cursor:pointer;transition:transform .15s}
+.add:active{transform:scale(.9)}
+.add:disabled{opacity:.3;cursor:not-allowed}
+.empty{color:var(--muted);padding:40px 0;text-align:center}
+
+/* order bar + sheet */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:10;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;transform:translateY(0);transition:transform .25s}
+.bar.off{transform:translateY(110%)}
+.bar b{font-family:var(--f-display);font-size:20px;font-variant-numeric:tabular-nums}
+.bar .cnt{background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:2px 9px;font-weight:700;margin-right:8px}
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
+.panel{background:var(--card);color:var(--ink);width:100%;max-width:560px;max-height:85%;overflow:auto;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+.panel h3{font-family:var(--f-display);font-size:22px;margin:0 0 10px;display:flex;justify-content:space-between;align-items:center}
+.close{border:0;background:transparent;color:var(--muted);font-size:26px;cursor:pointer}
+.line{display:grid;grid-template-columns:32px 1fr auto auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.line .e{font-size:24px}
+.line .n{min-width:0;font-weight:600;font-size:14px}
+.line .n small{display:block;color:var(--muted);font-weight:500}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;font-size:16px}
+.lt{font-variant-numeric:tabular-nums;font-weight:700;min-width:64px;text-align:right}
+.sum{display:grid;gap:6px;margin-top:14px;font-variant-numeric:tabular-nums}
+.sum div{display:flex;justify-content:space-between}
+.sum .tot{font-family:var(--f-display);font-size:22px;font-weight:800}
+.split{display:flex;align-items:center;gap:8px}
+.split button{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.clear{margin-top:14px;font:600 13px var(--f-body);background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:8px 14px;cursor:pointer}
+.note{font-size:12px;color:var(--muted);margin-top:36px;border-top:1px solid var(--line);padding-top:12px}
+.toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);padding:6px 14px;border-radius:999px;font-weight:700;font-size:13px;z-index:30;pointer-events:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brandrow">
+      <h1>Taş Fırın <span>Menü</span></h1>
+      <div class="meta">Fiyatlar 18.08.2026 · vergiler dahil<br>servis ücreti yok</div>
+    </div>
+    <div class="tools"><input id="q" type="search" placeholder="Ara: sucuk, tavuk, ayran…" aria-label="Menüde ara"></div>
+    <nav class="chips" id="chips" aria-label="Kategoriler"></nav>
+  </header>
+  <main id="menu"></main>
+  <p class="note">Masadaki basılı menünün fotoğrafından aktarılmıştır, resmi değildir. Fotoğrafta kenarı kesik birkaç isim tahmin edildi (ör. Füme Dil Pizza); Kavurmalı Calzone fiyatı okunamadı. Görseller temsilidir. Sipariş listesi yalnızca hesap için, restorana gönderilmez.</p>
+</div>
+
+<div class="bar off" id="bar" role="button" tabindex="0" aria-label="Siparişi aç">
+  <div><span class="cnt" id="cnt">0</span>Siparişim</div>
+  <b id="barTotal">₺0</b>
+</div>
+<div class="sheet" id="sheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-label="Sipariş">
+    <h3>Siparişim <button class="close" id="close" aria-label="Kapat">×</button></h3>
+    <div id="lines"></div>
+    <div class="sum">
+      <div class="tot"><span>Toplam</span><span id="tot">₺0</span></div>
+      <div><span class="split">Kişi sayısı <button id="pm">−</button><b id="ppl">1</b><button id="pp">+</button></span><span id="per">₺0 / kişi</span></div>
+    </div>
+    <button class="clear" id="clear">Listeyi temizle</button>
+  </div>
+</div>
+
+<script>
+const S=["Küçük","Standart","Büyük"];
+const M=[
+ {id:"atistirmalik",t:"Atıştırmalık",items:[
+  ["Çıtır Tavuk ve Patates","🍗",470],["Kabak & Jalapeno Cipsi","🥒",410],["Peynir Füme Et Tabağı","🧀",890],
+  ["Karman Çorman Sepeti","🧺",490],["Patates Kızartması","🍟",250],["Trüf Mayonez Soslu Patates","🍟",290],["Cheddar Soslu Patates","🧀",410]]},
+ {id:"salata",t:"Salata",items:[
+  ["Tulum Peynirli Cevizli Salata","🥗",450],["Tavuklu Sezar Salata","🥗",450,"Bonfile tavuk 120 gr"],["Roka Salata","🌿",360]]},
+ {id:"burger",t:"Burger",items:[
+  ["Classic Burger","🍔",560,"Dana burger 140 gr"],["Cheeseburger","🍔",590,"Dana burger 140 gr"],
+  ["Chicken Burger","🐔",470,"Bonfile tavuk 150 gr"],["Tiftik Burger","🍔",680,"160 gr tiftiklenmiş kaburga (pişmiş 80 gr), dana füme kaburga 25 gr"]]},
+ {id:"sokak",t:"Sokak Lezzetleri",items:[
+  ["Ekmek Arası Tavuk","🥖",400,"Bonfile tavuk 150 gr"],["Ekmek Arası Köfte","🥖",590,"Dana köfte 160 gr"],
+  ["Ekmek Arası Kokoreç","🥖",630,"Kuzu kokoreç 150 gr"],["Tavuk Dürüm","🌯",440,"Bonfile tavuk 150 gr"],
+  ["Tablacı Köfte Dürüm","🌯",570,"Dana köfte 160 gr"],["Çıtır Tavuk French Taco","🌮",450,"Lolita tavuk 170 gr"]]},
+ {id:"imza",t:"İmza Pizza",items:[
+  ["BBQ Tavuk Pizza","🍕",[580,680,830]],["Ricotta Pizza","🍕",[440,540,690]],["4 Formaggi Pizza","🧀",[580,680,830]],
+  ["Tavuk Sezar Pizza","🍕",[620,720,870]],["Inferno Pizza","🌶️",[580,680,830]],["Füme Kaburga Pizza","🍖",[690,840,1040]],
+  ["Ricotta & Füme Kaburga Pizza","🍖",[690,840,1040]],["Tiftik Pizza","🍖",[820,1020,1270]],["Mantarlı Pizza","🍄",[610,760,960]],
+  ["Teriyaki Tavuklu Pizza","🍕",[620,720,870]],["Kokoreç Pizza","🍕",[690,840,1040]],["Kasap Sucuk Pizza","🌭",[820,1020,1270]],
+  ["Ton Balıklı Pizza","🐟",[630,780,980]],["Frankfurter Sosis Pizza","🌭",[670,820,1020]],["Cheddar Salam Pizza","🧀",[630,780,980]],
+  ["Kavurmalı Calzone","🥟",null],["Füme Dil Pizza","🍕",[820,1020,1270]]]},
+ {id:"klasik",t:"Klasik Pizza",items:[
+  ["Margherita Pizza","🍅",[420,520,670]],["Karışık Pizza","🍕",[610,760,960]],["Pepperoni Pizza","🍕",[760,960,1210]],
+  ["Sucuklu Pizza","🌭",[630,780,980]],["Şarküteri Pizza","🥓",[860,1060,1310]],["Kavurmalı Pizza","🥩",[860,1060,1310]],
+  ["Pastırmalı Pizza","🥩",[840,1040,1290]],["Vejetaryen Pizza","🫑",[420,520,670]],["Kabaklı Tulum Peynirli Pizza","🥒",[610,760,960]]]},
+ {id:"tatli",t:"Tatlı",items:[["Marlenka","🍯",360],["Tiramisu","🍰",310]]},
+ {id:"sicak",t:"Sıcak İçecek",items:[["Americano","☕",165],["Espresso","☕",165],["Türk Kahvesi","☕",165],["Çay","🫖",60]]},
+ {id:"soguk",t:"Soğuk İçecek",items:[
+  ["Şişe Su","💧",65],["Soda","🫧",70],["Soda Limon","🍋",80],["Limonata","🍋",130],["7Up Kutu","🥤",115],
+  ["Niğde Gazozu","🍾",95],["Pepsi Kutu","🥤",115,"Zero Sugar veya Regular"],["Yedigün Kutu","🍊",115],
+  ["Lipton Ice Tea","🧃",115,"Limon, şeftali, karpuz, mango"],["Tropicana Meyve Suyu","🧃",115],
+  ["Özerhisar Ayran","🥛",90],["Sütaş Ayran (Kutu)","🥛",75]]}
+];
+const tl=n=>"₺"+n.toLocaleString("tr-TR");
+const $=s=>document.querySelector(s);
+const sizeSel={}; // item key -> size index
+let cart={}; let ppl=1;
+try{const s=JSON.parse(localStorage.getItem("menuCart")||"{}");cart=s.cart||{};ppl=s.ppl||1}catch(e){}
+const save=()=>{try{localStorage.setItem("menuCart",JSON.stringify({cart,ppl}))}catch(e){}};
+const lookup={};
+M.forEach(c=>c.items.forEach((it,i)=>{const k=c.id+i;lookup[k]={c,it};if(Array.isArray(it[2]))sizeSel[k]=1}));
+for(const ck in cart){const k=ck.split("|")[0];if(!lookup[k]||lookup[k].it[2]==null)delete cart[ck]}
+
+function priceOf(k,sz){const p=lookup[k].it[2];return Array.isArray(p)?p[sz]:p}
+
+function render(){
+  const q=$("#q").value.trim().toLocaleLowerCase("tr");
+  let html="",any=false;
+  M.forEach(c=>{
+    const rows=c.items.map((it,i)=>[it,c.id+i]).filter(([it])=>!q||(it[0]+" "+(it[3]||"")).toLocaleLowerCase("tr").includes(q));
+    if(!rows.length)return; any=true;
+    html+=`<section id="${c.id}"><div class="sec-h"><h2>${c.t}</h2><div class="hatch"></div></div><div class="grid">`;
+    rows.forEach(([it,k])=>{
+      const multi=Array.isArray(it[2]),na=it[2]==null;
+      const p=na?'<span class="price na">Fiyat sorun</span>':`<span class="price">${tl(priceOf(k,sizeSel[k]))}</span>`;
+      const sizes=multi?`<div class="sizes" role="group" aria-label="Boy">${S.map((s,j)=>`<button data-k="${k}" data-s="${j}" aria-pressed="${sizeSel[k]===j}">${s}</button>`).join("")}</div>`:"";
+      html+=`<article class="item"><button class="pic" data-add="${k}" aria-label="${it[0]} ekle">${it[1]}</button><div class="info"><div class="name">${it[0]}</div>${it[3]?`<div class="desc">${it[3]}</div>`:""}${sizes}<div class="row">${p}<button class="add" data-add="${k}" ${na?"disabled":""} aria-label="${it[0]} ekle">+</button></div></div></article>`;
+    });
+    html+="</div></section>";
+  });
+  $("#menu").innerHTML=any?html:'<p class="empty">Bu aramayla eşleşen ürün yok.</p>';
+}
+function chips(){
+  $("#chips").innerHTML=M.map(c=>`<button class="chip" data-go="${c.id}" aria-pressed="false">${c.t}</button>`).join("");
+}
+function cartKey(k){return lookup[k]&&Array.isArray(lookup[k].it[2])?k+"|"+sizeSel[k]:k+"|-"}
+function total(){return Object.entries(cart).reduce((s,[ck,n])=>{const [k,sz]=ck.split("|");return s+priceOf(k,+sz)*n},0)}
+function drawCart(){
+  const n=Object.values(cart).reduce((a,b)=>a+b,0),t=total();
+  $("#cnt").textContent=n;$("#barTotal").textContent=tl(t);$("#bar").classList.toggle("off",n===0);
+  $("#lines").innerHTML=Object.entries(cart).map(([ck,q])=>{const [k,sz]=ck.split("|");const it=lookup[k].it;
+    return `<div class="line"><span class="e">${it[1]}</span><span class="n">${it[0]}${sz!=="-"?`<small>${S[+sz]}</small>`:""}</span><span class="qty"><button data-dec="${ck}" aria-label="Azalt">−</button>${q}<button data-inc="${ck}" aria-label="Artır">+</button></span><span class="lt">${tl(priceOf(k,+sz)*q)}</span></div>`}).join("")||'<p class="empty">Liste boş.</p>';
+  $("#tot").textContent=tl(t);$("#ppl").textContent=ppl;$("#per").textContent=tl(Math.ceil(t/ppl))+" / kişi";
+  save();
+}
+let toastT;
+function toast(msg){let el=$(".toast");if(!el){el=document.createElement("div");el.className="toast";document.body.appendChild(el)}el.textContent=msg;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,1100)}
+
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.s!==undefined){sizeSel[b.dataset.k]=+b.dataset.s;render();return}
+  if(b.dataset.add){const k=b.dataset.add;if(lookup[k].it[2]==null)return;const ck=cartKey(k);cart[ck]=(cart[ck]||0)+1;drawCart();toast(lookup[k].it[0]+" eklendi");return}
+  if(b.dataset.inc){cart[b.dataset.inc]++;drawCart();return}
+  if(b.dataset.dec){if(--cart[b.dataset.dec]<=0)delete cart[b.dataset.dec];drawCart();return}
+  if(b.dataset.go){const s=document.getElementById(b.dataset.go);if(s)s.scrollIntoView({behavior:"smooth"});return}
+});
+$("#q").addEventListener("input",render);
+const openSheet=()=>{$("#sheet").hidden=false};
+$("#bar").addEventListener("click",openSheet);
+$("#bar").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openSheet()}});
+$("#close").addEventListener("click",()=>$("#sheet").hidden=true);
+$("#sheet").addEventListener("click",e=>{if(e.target.id==="sheet")$("#sheet").hidden=true});
+$("#pp").addEventListener("click",()=>{ppl++;drawCart()});
+$("#pm").addEventListener("click",()=>{ppl=Math.max(1,ppl-1);drawCart()});
+$("#clear").addEventListener("click",()=>{cart={};drawCart()});
+
+// highlight chip of section in view
+const io=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting)document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c.dataset.go===en.target.id))}),{rootMargin:"-180px 0px -60% 0px"});
+const obs=()=>{io.disconnect();document.querySelectorAll("section").forEach(s=>io.observe(s))};
+const _render=render;render=function(){_render();obs()};
+
+chips();render();drawCart();
+</script>
